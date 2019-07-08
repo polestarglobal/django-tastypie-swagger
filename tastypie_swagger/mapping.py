@@ -262,6 +262,11 @@ class ResourceSwaggerMapping(object):
                                     description=force_text(schema_field['help_text']),
                                 ))
 
+        # Manually extend with extra_attrs
+        if hasattr(self.resource._meta, 'extra_attrs'):
+            for extra_attr in self.resource._meta.extra_attrs:
+                parameters.append(extra_attr)
+
         return parameters
 
     def build_parameter_for_object(self, method='get'):
