@@ -1,8 +1,13 @@
 import datetime
 import logging
 
-from django.db.models.sql.constants import QUERY_TERMS
-
+#from django.db.models.sql.constants import QUERY_TERMS
+QUERY_TERMS = {
+    'exact', 'iexact', 'contains', 'icontains', 'gt', 'gte', 'lt', 'lte', 'in',
+    'startswith', 'istartswith', 'endswith', 'iendswith', 'range', 'year',
+    'month', 'day', 'week_day', 'hour', 'minute', 'second', 'isnull', 'search',
+    'regex', 'iregex',
+}
 try:
     from django.utils.encoding import force_text
 except ImportError:
@@ -160,9 +165,9 @@ class ResourceSwaggerMapping(object):
             'name': "order_by",
             'dataType': "String",
             'required': False,
-            'description': "Orders the result set based on the selection. "
-                           "Ascending order by default, prepending the '-' "
-                           "sign change the sorting order to descending",
+            'description': str("Orders the result set based on the selection. "
+                                   "Ascending order by default, prepending the '-' "
+                                   "sign change the sorting order to descending"),
             'allowableValues': {
                 'valueType' : "LIST",
                 'values': values
@@ -207,12 +212,7 @@ class ResourceSwaggerMapping(object):
                             #This code has been mostly sucked from the tastypie lib
                             if getattr(self.resource._meta, 'queryset', None) is not None:
                                 # Get the possible query terms from the current QuerySet.
-                                if hasattr(self.resource._meta.queryset.query.query_terms, 'keys'):
-                                    # Django 1.4 & below compatibility.
-                                    field = self.resource._meta.queryset.query.query_terms.keys()
-                                else:
-                                    # Django 1.5+.
-                                    field = self.resource._meta.queryset.query.query_terms
+                                field = QUERY_TERMS
                             else:
                                 if hasattr(QUERY_TERMS, 'keys'):
                                     # Django 1.4 & below compatibility.
@@ -262,11 +262,6 @@ class ResourceSwaggerMapping(object):
                                     description=force_text(schema_field['help_text']),
                                 ))
 
-        # Manually extend with extra_attrs
-        if hasattr(self.resource._meta, 'extra_attrs'):
-            for extra_attr in self.resource._meta.extra_attrs:
-                parameters.append(extra_attr)
-
         return parameters
 
     def build_parameter_for_object(self, method='get'):
@@ -309,7 +304,7 @@ class ResourceSwaggerMapping(object):
                                   name=name,
                                   dataType=field['dataType'],
                                   required=field['required'],
-                                  description=field['description']
+                                  description=str(field['description'])
                                   ))
 
 
